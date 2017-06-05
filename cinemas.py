@@ -41,9 +41,9 @@ def get_kinopoisk_films_id(films_cinemas_count_list):
 
 
 def get_xml_kinopoisk_list(kinopoisk_ids):
-    xml_kinopoisk_list=[]
+    xml_kinopoisk_list = []
     for movie in kinopoisk_ids:
-        context = requests.get('https://rating.kinopoisk.ru/{}.xml'.  # TODO edit format to params!
+        context = requests.get('https://rating.kinopoisk.ru/{}.xml'.
                                format(movie['id']))
         xml_kinopoisk_list.append(context)
     return xml_kinopoisk_list
@@ -62,46 +62,46 @@ def parse_rate_kinopoisk(xml_kinopoisk_list):
 
 
 def get_output_fimls(kinopoisk_ids, kinopoisk_rates, cinemas_count_list):
+    rate_counts = 300
     movies_info_list = [dict(x, **y)
                         for x, y in zip(kinopoisk_ids, kinopoisk_rates)]
-    for d, num in zip(movies_info_list, cinemas_count_list): # TODO change vars
-        d['cinemas_count'] = num['cinemas_count']
-    for movie in movies_info_list:
-        if int(movie['counts_rate']) < 300: # TODO create var for 200
-            movies_info_list.remove(movie)
+    for movies, cinemas in zip(movies_info_list, cinemas_count_list):
+        movies['cinemas_count'] = cinemas['cinemas_count']
+    movies_info_list = [x for x in movies_info_list
+                        if int(x.get('counts_rate')) > rate_counts]
     movies_info_list = sorted(movies_info_list,
                               key=itemgetter('rate'), reverse=True)
     return movies_info_list
 
-"""
-def output_films(movies_info_list, parser):
-    if parser False:
-        for movie in movies_info_list[:10]:
-            print('Movie: "{}".\n have rate: {}.\n Cinemas count where show this movie: {}.\n'
-                  .format(movie['name'],movie['rate'], movie['cinemas_count']))
-    else:
-        for movie in movies_info_list:
-            if movie['cinemas_count'] < 40:
-                movies_info_list.remove(movie)
-        for movie in movies_info_list[:10]:
-            print('Movie: "{}".\n have rate: {}.\n Cinemas count where show this movie: {}.\n'
-                  .format(movie['name'], movie['rate'], movie['cinemas_count']))
+
+def output_films(movies_info_list, namespace):
+    if namespace.cinemas:
+        cinemas_counts = 40
+        movies_info_list = [x for x in movies_info_list
+                            if x.get('cinemas_count') > cinemas_counts]
+    for movie in movies_info_list[:10]:
+        print('Movie: "{}".\n have rate: {}.\n '
+              'Cinemas count where show this movie: {}.\n'
+              .format(movie['name'], movie['rate'], movie['cinemas_count']))
 
 
 def create_parser_for_user_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--cinemas', nargs='?',
-                        help='Only movies in a lot of cinemas')
+    parser.add_argument('-c', '--cinemas', action='store_const',
+                        const=True, help='Only movies in a lot of cinemas')
     return parser
-"""
+
 
 if __name__ == '__main__':
     parser = create_parser_for_user_arguments()
+    namespace = parser.parse_args()
     url_afisha = 'https://www.afisha.ru/msk/schedule_cinema/#'
     afisha_raw_html = fetch_afisha_page(url_afisha)
     cinemas_count_list = parse_afisha_list(afisha_raw_html)
     kinopoisk_ids = get_kinopoisk_films_id(cinemas_count_list)
-    xml_kinopoisk_list=get_xml_kinopoisk_list(kinopoisk_ids)
+    xml_kinopoisk_list = get_xml_kinopoisk_list(kinopoisk_ids)
     kinopoisk_rates = parse_rate_kinopoisk(xml_kinopoisk_list)
-    movies_info_list=get_output_fimls(kinopoisk_ids, kinopoisk_rates, cinemas_count_list)
-    output_films(movies_info_list, parser)
+    movies_info_list = get_output_fimls(kinopoisk_ids,
+                                        kinopoisk_rates,
+                                        cinemas_count_list)
+    output_films(movies_info_list, namespace)
