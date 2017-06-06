@@ -40,10 +40,10 @@ def get_kinopoisk_films_id(films_cinemas_count_list):
     return kinopoisk_ids
 
 
-def get_xml_kinopoisk_list(kinopoisk_ids):
+def get_xml_kinopoisk_list(kinopoisk_ids, kinopoisk_xml):
     xml_kinopoisk_list = []
     for movie in kinopoisk_ids:
-        context = requests.get('https://rating.kinopoisk.ru/{}.xml'.
+        context = requests.get(kinopoisk_xml.
                                format(movie['id']))
         xml_kinopoisk_list.append(context)
     return xml_kinopoisk_list
@@ -62,13 +62,13 @@ def parse_rate_kinopoisk(xml_kinopoisk_list):
 
 
 def get_output_fimls(kinopoisk_ids, kinopoisk_rates, cinemas_count_list):
-    rate_counts = 300
+    rate_counts_min = 300
     movies_info_list = [dict(x, **y)
                         for x, y in zip(kinopoisk_ids, kinopoisk_rates)]
     for movies, cinemas in zip(movies_info_list, cinemas_count_list):
         movies['cinemas_count'] = cinemas['cinemas_count']
     movies_info_list = [x for x in movies_info_list
-                        if int(x.get('counts_rate')) > rate_counts]
+                        if int(x.get('counts_rate')) > rate_counts_min]
     movies_info_list = sorted(movies_info_list,
                               key=itemgetter('rate'), reverse=True)
     return movies_info_list
@@ -81,7 +81,7 @@ def output_films(movies_info_list, namespace):
                             if x.get('cinemas_count') > cinemas_counts]
     for movie in movies_info_list[:10]:
         print('Movie: "{}".\n have rate: {}.\n '
-              'Cinemas count where show this movie: {}.\n'
+              'Cinemas count where shows this movie: {}.\n'
               .format(movie['name'], movie['rate'], movie['cinemas_count']))
 
 
@@ -96,12 +96,19 @@ if __name__ == '__main__':
     parser = create_parser_for_user_arguments()
     namespace = parser.parse_args()
     url_afisha = 'https://www.afisha.ru/msk/schedule_cinema/#'
-    afisha_raw_html = fetch_afisha_page(url_afisha)
-    cinemas_count_list = parse_afisha_list(afisha_raw_html)
-    kinopoisk_ids = get_kinopoisk_films_id(cinemas_count_list)
-    xml_kinopoisk_list = get_xml_kinopoisk_list(kinopoisk_ids)
-    kinopoisk_rates = parse_rate_kinopoisk(xml_kinopoisk_list)
-    movies_info_list = get_output_fimls(kinopoisk_ids,
-                                        kinopoisk_rates,
-                                        cinemas_count_list)
-    output_films(movies_info_list, namespace)
+    kinopoisk_xml = 'https://rating.kinopoisk.ru/{}.xml'
+    print('Please wait')
+    try:
+        afisha_raw_html = fetch_afisha_page(url_afisha)
+        cinemas_count_list = parse_afisha_list(afisha_raw_html)
+        kinopoisk_ids = get_kinopoisk_films_id(cinemas_count_list)
+        xml_kinopoisk_list = get_xml_kinopoisk_list(kinopoisk_ids,
+                                                    kinopoisk_xml)
+    except requests.exceptions.ConnectionError:
+        print('Error! Check your connection and URL!')
+    else:
+        kinopoisk_rates = parse_rate_kinopoisk(xml_kinopoisk_list)
+        movies_info_list = get_output_fimls(kinopoisk_ids,
+                                            kinopoisk_rates,
+                                            cinemas_count_list)
+        output_films(movies_info_list, namespace)
