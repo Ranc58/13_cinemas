@@ -1,16 +1,17 @@
 # Cinemas
 
-This script print top-10 movies in Moscow cinemas from [Afisha.ru](https://www.afisha.ru/msk/schedule_cinema/) by rate from [Kinopoisk.ru](https://www.kinopoisk.ru).\
+This script print top-10 movies in Moscow cinemas from [Afisha.ru](https://www.afisha.ru/msk/schedule_cinema/) by rate from [Kinopoisk.ru](https://www.kinopoisk.ru). \
 Output can be sorted by rating only or by rating and cinemas counts > 40. \
-Script don't output movies with rate counts < 300
-#How to install
+Script don't output movies with rate counts < 300.
+
+# How to install
 1) Recomended use venv or virtualenv for better isolation.\
 Venv setup example: \
 `python -m venv myenv`\
 `source myenv/bin/activate`
 2) Install requirements:
 `pip3 install -r requirements.txt` (alternatively try add `sudo` before command)
-#Quick launch example
+# Quick launch example
 1) Output movies only by rate:\
 ```
 $ python cinemas.py
