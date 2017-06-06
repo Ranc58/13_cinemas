@@ -14,6 +14,7 @@ Venv setup example: \
 1) Output movies only by rate:\
 ```
 $ python cinemas.py
+Please wait
 Movie: "Одержимость".
  have rate: 8.318.
  Cinemas count where shows this movie: 1.
@@ -57,6 +58,19 @@ Movie: "Нелюбовь".
 2) For output movies sorted by rate and cinemas counts use argument `-c`:
 ```
 $ python cinemas.py -c
+Please wait
+Movie: "Большой".
+ have rate: 7.922.
+ Cinemas count where shows this movie: 54.
+
+Movie: "Нелюбовь".
+ have rate: 7.683.
+ Cinemas count where shows this movie: 118.
+
+Movie: "Стражи Галактики. Часть 2".
+ have rate: 7.651.
+ Cinemas count where shows this movie: 43.
+
 Movie: "Одарённая".
  have rate: 7.43.
  Cinemas count where shows this movie: 57.
@@ -84,6 +98,7 @@ Movie: "Спасатели Малибу".
 Movie: "Трио в перьях".
  have rate: 5.807.
  Cinemas count where shows this movie: 50.
+
 ```
 
 # Project Goals
