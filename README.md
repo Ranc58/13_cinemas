@@ -12,7 +12,7 @@ Venv setup example: \
 2) Install requirements:
 `pip3 install -r requirements.txt` (alternatively try add `sudo` before command)
 # Quick launch example
-1) Output movies only by rate:\
+1) Output movies only by rate:
 ```
 $ python cinemas.py
 Please wait
