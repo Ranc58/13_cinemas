@@ -74,12 +74,17 @@ def get_output_fimls(kinopoisk_ids, kinopoisk_rates, cinemas_count_list):
     return movies_info_list
 
 
-def output_films(movies_info_list, namespace):
+def filter_movies_for_output(movies_info_list, namespace):
     if namespace.cinemas:
         cinemas_counts = 40
         movies_info_list = [x for x in movies_info_list
                             if x.get('cinemas_count') > cinemas_counts]
-    for movie in movies_info_list[:10]:
+    top_10_movies = movies_info_list[:10]
+    return top_10_movies
+
+
+def output_films(top_10_movies):
+    for movie in top_10_movies:
         print('Movie: "{}".\n have rate: {}.\n '
               'Cinemas count where shows this movie: {}.\n'
               .format(movie['name'], movie['rate'], movie['cinemas_count']))
@@ -89,12 +94,11 @@ def create_parser_for_user_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--cinemas', action='store_const',
                         const=True, help='Only movies in a lot of cinemas')
-    return parser
+    return parser.parse_args()
 
 
 if __name__ == '__main__':
-    parser = create_parser_for_user_arguments()
-    namespace = parser.parse_args()
+    namespace = create_parser_for_user_arguments()
     url_afisha = 'https://www.afisha.ru/msk/schedule_cinema/#'
     kinopoisk_xml = 'https://rating.kinopoisk.ru/{}.xml'
     print('Please wait')
@@ -111,4 +115,5 @@ if __name__ == '__main__':
         movies_info_list = get_output_fimls(kinopoisk_ids,
                                             kinopoisk_rates,
                                             cinemas_count_list)
-        output_films(movies_info_list, namespace)
+        top_10_movies=filter_movies_for_output(movies_info_list, namespace)
+        output_films(top_10_movies)
